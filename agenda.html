@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Agenda — HS CRM</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #1f2937;padding:8px;background:#0f172a}
+    input,select{background:#111827;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:8px}
+  </style>
+</head>
+<body>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <div class="wrap">
+    <h1>Agenda semanal</h1>
+    <table>
+      <thead><tr><th>Dia</th><th>Manhã</th><th>Tarde</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p><button id="save">Salvar</button> <a href="/">← Voltar</a></p>
+  </div>
+  <script type="module">
+    import { ensureIdentity } from './ui/auth.js';
+    const user = await ensureIdentity();
+    if(!user) alert('Faça login para salvar seu planejamento.');
+    const rows = document.getElementById('rows');
+    const days = ['Segunda','Terça','Quarta','Quinta','Sexta'];
+    const plan = await fetch('/api/plan_get',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload:{email:user?.email||''}})}).then(r=>r.json());
+    const map = plan.items||{};
+    days.forEach((d,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${d}</td>
+      <td><input id="m_${i}" value="${map['m_'+i]||''}" placeholder="ex.: 30 ligações, 10 follow-ups"></td>
+      <td><input id="t_${i}" value="${map['t_'+i]||''}" placeholder="ex.: 5 visitas, 20 propostas"></td>`;
+      rows.appendChild(tr);
+    });
+    document.getElementById('save').onclick=async()=>{
+      const payload = { email: user?.email||'', items:{} };
+      days.forEach((d,i)=>{ payload.items['m_'+i]=document.getElementById('m_'+i).value; payload.items['t_'+i]=document.getElementById('t_'+i).value; });
+      await fetch('/api/plan_save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload})});
+      alert('Planejamento salvo.');
+    };
+  </script>
+</body>
+</html>

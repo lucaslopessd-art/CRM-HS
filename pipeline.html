@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Pipeline — HS CRM</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    h1{margin:0 0 12px}
+    .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .col{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:8px;min-height:220px}
+    .deal{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:8px;margin:8px 0}
+    input,button{background:#111827;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:8px}
+    .top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <div class="wrap">
+    <h1>Pipeline</h1>
+    <div class="top">
+      <input id="title" placeholder="Título do negócio">
+      <input id="value" type="number" placeholder="Valor (R$)">
+      <button id="add">Adicionar</button>
+      <a href="/">← Voltar</a>
+    </div>
+    <div class="cols">
+      <div class="col" data-stage="OFFER"><h3>Oferecer</h3><div class="list" id="col-OFFER"></div></div>
+      <div class="col" data-stage="PROSPECT"><h3>Prospectar</h3><div class="list" id="col-PROSPECT"></div></div>
+      <div class="col" data-stage="VISIT"><h3>Visitar</h3><div class="list" id="col-VISIT"></div></div>
+      <div class="col" data-stage="WIN"><h3>Vender</h3><div class="list" id="col-WIN"></div></div>
+    </div>
+  </div>
+  <script type="module">
+    import { ensureIdentity } from './ui/auth.js';
+    let user = await ensureIdentity();
+    async function api(path, payload){
+      const res = await fetch('/api/'+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload,user})});
+      return res.json();
+    }
+    async function load(){
+      const data = await api('deal_list',{});
+      ['OFFER','PROSPECT','VISIT','WIN'].forEach(s=>document.getElementById('col-'+s).innerHTML='');
+      data.items.forEach(d=>render(d));
+    }
+    function render(d){
+      const box = document.getElementById('col-'+d.stage);
+      const el = document.createElement('div');
+      el.className='deal';
+      el.innerHTML = `<b>${d.title}</b><br>R$ ${Number(d.value).toLocaleString()}<br>
+        <small>${d.stage}</small><br>
+        <button data-mv="prev">◀</button>
+        <button data-mv="next">▶</button>
+        <button data-win="1">Ganhei</button>
+        <button data-lose="1">Perdi</button>`;
+      el.querySelector('[data-mv="prev"]').onclick=()=>move(d,'prev');
+      el.querySelector('[data-mv="next"]').onclick=()=>move(d,'next');
+      el.querySelector('[data-win]').onclick=()=>win(d);
+      el.querySelector('[data-lose]').onclick=()=>lose(d);
+      box.appendChild(el);
+    }
+    async function move(d,dir){
+      const data = await api('deal_move',{id:d.id,dir});
+      await load();
+    }
+    async function win(d){
+      const data = await api('deal_win',{id:d.id});
+      alert('Venda registrada. Parcelas de comissão geradas.');
+      await load();
+    }
+    async function lose(d){
+      const why = prompt('Motivo da perda? (preço, tempo, concorrência, etc.)')||'outro';
+      const data = await api('deal_lose',{id:d.id,reason:why});
+      await load();
+    }
+    document.getElementById('add').onclick=async()=>{
+      const title = document.getElementById('title').value.trim();
+      const value = Number(document.getElementById('value').value||0);
+      if(!title||!value) return alert('Preencha título e valor.');
+      await api('deal_new',{title,value});
+      document.getElementById('title').value=''; document.getElementById('value').value='';
+      await load();
+    };
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>HS CRM — Início</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
+    a.btn{display:inline-block;background:#111827;border:1px solid #1f2937;padding:12px 16px;border-radius:12px;text-decoration:none;color:#e5e7eb;margin:4px}
+    .wrap{max-width:960px;margin:0 auto;padding:24px}
+    h1{margin:0 0 12px;font-weight:700}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:16px}
+    small{opacity:.8}
+  </style>
+</head>
+<body>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <div class="wrap">
+    <h1>HS CRM</h1>
+    <p>Escolha um módulo para começar.</p>
+    <div class="grid">
+      <div class="card"><h3>Pipeline</h3><p>Oferecer → Prospectar → Visitar → Vender.</p><a class="btn" href="/pipeline.html">Abrir pipeline</a></div>
+      <div class="card"><h3>Agenda</h3><p>Planejamento semanal (manhã / tarde) com check.</p><a class="btn" href="/agenda.html">Abrir agenda</a></div>
+      <div class="card"><h3>Dashboard (Admin)</h3><p>KPIs do funil e comissões.</p><a class="btn" href="/dashboard.html">Abrir dashboard</a></div>
+      <div class="card"><h3>Configurações (Admin)</h3><p>Faixas, parcelas, estorno, acessos.</p><a class="btn" href="/settings.html">Abrir configurações</a></div>
+    </div>
+    <p><small>Login: use o botão do Netlify Identity no canto inferior direito após abrir uma página.</small></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Configurações — HS CRM</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
+    .wrap{max-width:900px;margin:0 auto;padding:16px}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:12px;margin:8px 0}
+    input,select,textarea{width:100%;background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:10px;padding:8px}
+    label{display:block;margin:8px 0 4px}
+    button{background:#0f172a;border:1px solid #334155;color:#e5e7eb;border-radius:10px;padding:10px 14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  </style>
+</head>
+<body>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <div class="wrap">
+    <h1>Configurações (Somente administradores)</h1>
+    <div id="err" class="card" style="display:none"></div>
+    <form id="form" class="card" style="display:none">
+      <div class="grid">
+        <div>
+          <label>Tipo de parcelamento</label>
+          <select id="parcelType">
+            <option value="COMMISSION">sobre a comissão</option>
+            <option value="BASE">sobre o valor base</option>
+          </select>
+        </div>
+        <div>
+          <label>Parcelas (separadas por vírgula)</label>
+          <input id="parcelPercents" placeholder="20,20,20,20,20"/>
+        </div>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Estorno (até a 8ª) — % sobre base</label>
+          <input id="chargeback" type="number" step="0.01" placeholder="1.5"/>
+        </div>
+        <div>
+          <label>ADMIN_EMAIL (só leitura)</label>
+          <input id="adminEmail" disabled/>
+        </div>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Faixa 1 (0–299.999,99) %</label>
+          <input id="rate1" type="number" step="0.01"/>
+        </div>
+        <div>
+          <label>Faixa 2 (300.000–499.999,99) %</label>
+          <input id="rate2" type="number" step="0.01"/>
+        </div>
+      </div>
+      <div class="grid">
+        <div>
+          <label>Faixa 3 (≥ 500.000,00) %</label>
+          <input id="rate3" type="number" step="0.01"/>
+        </div>
+        <div></div>
+      </div>
+      <button type="submit">Salvar</button>
+    </form>
+    <p><a href="/">← Voltar</a></p>
+  </div>
+  <script type="module">
+    import { ensureIdentity } from './ui/auth.js';
+    const user = await ensureIdentity();
+    const env = await fetch('/api/env_public').then(r=>r.json());
+    const err = document.getElementById('err');
+    const form = document.getElementById('form');
+    if(!user || user.email !== env.ADMIN_EMAIL){
+      err.style.display='block'; err.textContent='Acesso negado. Entre com o e-mail do administrador.';
+      throw new Error('forbidden');
+    }
+    form.style.display='block';
+    const cfg = await fetch('/api/config_get',{method:'POST'}).then(r=>r.json());
+    adminEmail.value = env.ADMIN_EMAIL||'';
+    parcelType.value = cfg.parcelType||'COMMISSION';
+    parcelPercents.value = (cfg.parcelPercents||[20,20,20,20,20]).join(',');
+    chargeback.value = cfg.chargeback ?? 1.5;
+    rate1.value = cfg.rate1 ?? 3.5;
+    rate2.value = cfg.rate2 ?? 3.75;
+    rate3.value = cfg.rate3 ?? 4.0;
+    form.onsubmit = async (e)=>{
+      e.preventDefault();
+      const payload = {
+        parcelType: parcelType.value,
+        parcelPercents: parcelPercents.value.split(',').map(x=>Number(x.trim())).filter(x=>!Number.isNaN(x)),
+        chargeback: Number(chargeback.value||0),
+        rate1: Number(rate1.value||0),
+        rate2: Number(rate2.value||0),
+        rate3: Number(rate3.value||0)
+      };
+      const r = await fetch('/api/config_save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload})}).then(r=>r.json());
+      alert('Salvo.');
+    };
+  </script>
+</body>
+</html>

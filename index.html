@@ -2,96 +2,82 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>HS CRM — Início</title>
 
-  <!-- Bootswatch Darkly (Bootstrap 5) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css">
-  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-  <!-- Shell UI -->
   <link rel="stylesheet" href="/assets/ui.css">
 </head>
 <body>
-  <div id="app" class="d-flex"></div>
+  <div id="app"></div>
 
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script type="module" src="/assets/ui.js"></script>
-  <script type="module">
-    import { renderShell } from '/assets/ui.js';
+  <template id="raw">
+    <div class="row g-4">
+      <div class="col-12">
+        <h2 class="h4 mb-3">Escolha um módulo</h2>
+      </div>
 
-    const content = /*html*/`
-      <div class="container-fluid py-4">
-        <div class="row g-4">
-          <div class="col-12">
-            <h1 class="h3 mb-1">HS CRM</h1>
-            <p class="text-secondary mb-4">Escolha um módulo para começar.</p>
-          </div>
-
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <span class="me-2 text-primary fs-4"><i class="bi bi-kanban"></i></span>
-                  <h2 class="h5 mb-0">Pipeline</h2>
-                </div>
-                <p class="text-secondary small mb-3">Oferecer → Prospectar → Visitar → Vender.</p>
-                <a class="btn btn-primary w-100" href="/pipeline.html">
-                  <i class="bi bi-arrow-right-circle me-2"></i> Abrir pipeline
-                </a>
-              </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-kanban fs-4 text-primary"></i>
+              <h3 class="h5 mb-0">Pipeline</h3>
             </div>
-          </div>
-
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <span class="me-2 text-success fs-4"><i class="bi bi-calendar2-check"></i></span>
-                  <h2 class="h5 mb-0">Agenda</h2>
-                </div>
-                <p class="text-secondary small mb-3">Planejamento semanal (manhã/tarde) com check.</p>
-                <a class="btn btn-success w-100" href="/agenda.html">
-                  <i class="bi bi-arrow-right-circle me-2"></i> Abrir agenda
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <span class="me-2 text-info fs-4"><i class="bi bi-speedometer2"></i></span>
-                  <h2 class="h5 mb-0">Dashboard (Admin)</h2>
-                </div>
-                <p class="text-secondary small mb-3">KPIs do funil e comissões.</p>
-                <a class="btn btn-info w-100" href="/painel.html">
-                  <i class="bi bi-arrow-right-circle me-2"></i> Abrir dashboard
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <span class="me-2 text-warning fs-4"><i class="bi bi-gear"></i></span>
-                  <h2 class="h5 mb-0">Configurações (Admin)</h2>
-                </div>
-                <p class="text-secondary small mb-3">Faixas, parcelas, estorno, acessos.</p>
-                <a class="btn btn-warning w-100" href="/configurações.html">
-                  <i class="bi bi-arrow-right-circle me-2"></i> Abrir configurações
-                </a>
-              </div>
-            </div>
+            <p class="text-body-secondary mb-3">Oferecer → Prospectar → Visitar → Vender.</p>
+            <a href="/pipeline.html" class="btn btn-primary w-100">Abrir pipeline</a>
           </div>
         </div>
-      </div>`;
+      </div>
 
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-calendar2-check fs-4 text-primary"></i>
+              <h3 class="h5 mb-0">Agenda</h3>
+            </div>
+            <p class="text-body-secondary mb-3">Planejamento semanal (manhã/tarde) com check.</p>
+            <a href="/agenda.html" class="btn btn-primary w-100">Abrir agenda</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-graph-up fs-4 text-primary"></i>
+              <h3 class="h5 mb-0">Dashboard (Admin)</h3>
+            </div>
+            <p class="text-body-secondary mb-3">KPIs do funil e comissões.</p>
+            <a href="/painel.html" class="btn btn-outline-primary w-100">Abrir dashboard</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-gear fs-4 text-primary"></i>
+              <h3 class="h5 mb-0">Configurações (Admin)</h3>
+            </div>
+            <p class="text-body-secondary mb-3">Faixas, parcelas, estorno, acessos.</p>
+            <a href="/configurações.html" class="btn btn-outline-primary w-100">Abrir configurações</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+    import { renderShell } from '/assets/ui.js';
+    const content = document.getElementById('raw')?.innerHTML || '';
     renderShell({ active: 'home', content });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

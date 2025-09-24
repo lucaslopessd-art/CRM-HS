@@ -1,88 +1,173 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Pipeline — HS CRM</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HS CRM — Pipeline</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/assets/ui.css">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
-    .wrap{max-width:1200px;margin:0 auto;padding:16px}
-    h1{margin:0 0 12px}
-    .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .col{background:#0f172a;border:1px solid #1f2937;border-radius:12px;padding:8px;min-height:220px}
-    .deal{background:#111827;border:1px solid #1f2937;border-radius:10px;padding:8px;margin:8px 0}
-    input,button{background:#111827;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:8px}
-    .top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .stage { border:1px dashed var(--bs-border-color); border-radius:.75rem; padding:.75rem; min-height: 280px; background: var(--bs-body-bg); }
+    .deal { border:1px solid var(--bs-border-color); border-radius:.75rem; background: var(--bs-body-bg); padding:.75rem; margin:.5rem 0; }
   </style>
 </head>
 <body>
+  <div id="app"></div>
+
+  <template id="raw">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 mb-0">Pipeline</h2>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newDeal"><i class="bi bi-plus-lg me-1"></i>Novo lead</button>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between">
+            <strong>Oferecer</strong>
+            <span class="badge text-bg-secondary" id="count-offer">0</span>
+          </div>
+          <div class="card-body"><div id="stage-offer" class="stage"></div></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between">
+            <strong>Prospectar</strong>
+            <span class="badge text-bg-secondary" id="count-prospect">0</span>
+          </div>
+          <div class="card-body"><div id="stage-prospect" class="stage"></div></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between">
+            <strong>Visitar</strong>
+            <span class="badge text-bg-secondary" id="count-visit">0</span>
+          </div>
+          <div class="card-body"><div id="stage-visit" class="stage"></div></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between">
+            <strong>Vender</strong>
+            <span class="badge text-bg-secondary" id="count-sell">0</span>
+          </div>
+          <div class="card-body"><div id="stage-sell" class="stage"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal novo lead -->
+    <div class="modal fade" id="newDeal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form id="dealForm">
+            <div class="modal-header">
+              <h5 class="modal-title">Novo lead</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body row g-3">
+              <div class="col-12">
+                <label class="form-label">Nome</label>
+                <input class="form-control" name="nome" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Telefone</label>
+                <input class="form-control" name="fone">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">E-mail</label>
+                <input type="email" class="form-control" name="email">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Tipo de crédito</label>
+                <select class="form-select" name="tipo">
+                  <option>Veículo</option><option>Imóvel</option>
+                  <option>Investimento</option><option>Outros</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Parcela que comporta (R$)</label>
+                <input type="number" class="form-control" name="parcela" min="0">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Observações</label>
+                <textarea class="form-control" rows="2" name="obs"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button class="btn btn-primary" type="submit">Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </template>
+
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <div class="wrap">
-    <h1>Pipeline</h1>
-    <div class="top">
-      <input id="title" placeholder="Título do negócio">
-      <input id="value" type="number" placeholder="Valor (R$)">
-      <button id="add">Adicionar</button>
-      <a href="/">← Voltar</a>
-    </div>
-    <div class="cols">
-      <div class="col" data-stage="OFFER"><h3>Oferecer</h3><div class="list" id="col-OFFER"></div></div>
-      <div class="col" data-stage="PROSPECT"><h3>Prospectar</h3><div class="list" id="col-PROSPECT"></div></div>
-      <div class="col" data-stage="VISIT"><h3>Visitar</h3><div class="list" id="col-VISIT"></div></div>
-      <div class="col" data-stage="WIN"><h3>Vender</h3><div class="list" id="col-WIN"></div></div>
-    </div>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { ensureIdentity } from './ui/auth.js';
-    let user = await ensureIdentity();
-    async function api(path, payload){
-      const res = await fetch('/api/'+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload,user})});
-      return res.json();
+    import { renderShell } from '/assets/ui.js';
+    const content = document.getElementById('raw')?.innerHTML || '';
+    renderShell({ active: 'pipeline', content });
+
+    // --- Demo localStorage (substituível por API depois)
+    const LS_KEY = 'hscrm_pipeline';
+    const stages = { offer:'stage-offer', prospect:'stage-prospect', visit:'stage-visit', sell:'stage-sell' };
+    const counters = { offer:'count-offer', prospect:'count-prospect', visit:'count-visit', sell:'count-sell' };
+
+    function load() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch { return []; } }
+    function save(items) { localStorage.setItem(LS_KEY, JSON.stringify(items)); }
+    function render() {
+      const data = load();
+      for (const k in stages) document.getElementById(stages[k]).innerHTML = '';
+      const counts = { offer:0, prospect:0, visit:0, sell:0 };
+      for (const d of data) {
+        const el = document.createElement('div');
+        el.className = 'deal';
+        el.innerHTML = `<strong>${d.nome}</strong><br><span class="text-body-secondary small">${d.tipo} • R$ ${Number(d.parcela||0).toLocaleString('pt-BR')}</span>
+        <div class="mt-2 d-flex gap-2">
+          <button class="btn btn-sm btn-outline-secondary" data-move="prev">←</button>
+          <button class="btn btn-sm btn-outline-secondary" data-move="next">→</button>
+        </div>`;
+        el.querySelector('[data-move="prev"]').onclick = () => move(d.id, -1);
+        el.querySelector('[data-move="next"]').onclick = () => move(d.id, +1);
+        document.getElementById(stages[d.stage]).appendChild(el);
+        counts[d.stage]++; 
+      }
+      for (const k in counters) document.getElementById(counters[k]).textContent = counts[k];
     }
-    async function load(){
-      const data = await api('deal_list',{});
-      ['OFFER','PROSPECT','VISIT','WIN'].forEach(s=>document.getElementById('col-'+s).innerHTML='');
-      data.items.forEach(d=>render(d));
+    function move(id, dir) {
+      const order = ['offer','prospect','visit','sell'];
+      const data = load();
+      const it = data.find(x=>x.id===id); if (!it) return;
+      const idx = order.indexOf(it.stage);
+      const to = Math.min(order.length-1, Math.max(0, idx+dir));
+      it.stage = order[to]; save(data); render();
     }
-    function render(d){
-      const box = document.getElementById('col-'+d.stage);
-      const el = document.createElement('div');
-      el.className='deal';
-      el.innerHTML = `<b>${d.title}</b><br>R$ ${Number(d.value).toLocaleString()}<br>
-        <small>${d.stage}</small><br>
-        <button data-mv="prev">◀</button>
-        <button data-mv="next">▶</button>
-        <button data-win="1">Ganhei</button>
-        <button data-lose="1">Perdi</button>`;
-      el.querySelector('[data-mv="prev"]').onclick=()=>move(d,'prev');
-      el.querySelector('[data-mv="next"]').onclick=()=>move(d,'next');
-      el.querySelector('[data-win]').onclick=()=>win(d);
-      el.querySelector('[data-lose]').onclick=()=>lose(d);
-      box.appendChild(el);
-    }
-    async function move(d,dir){
-      const data = await api('deal_move',{id:d.id,dir});
-      await load();
-    }
-    async function win(d){
-      const data = await api('deal_win',{id:d.id});
-      alert('Venda registrada. Parcelas de comissão geradas.');
-      await load();
-    }
-    async function lose(d){
-      const why = prompt('Motivo da perda? (preço, tempo, concorrência, etc.)')||'outro';
-      const data = await api('deal_lose',{id:d.id,reason:why});
-      await load();
-    }
-    document.getElementById('add').onclick=async()=>{
-      const title = document.getElementById('title').value.trim();
-      const value = Number(document.getElementById('value').value||0);
-      if(!title||!value) return alert('Preencha título e valor.');
-      await api('deal_new',{title,value});
-      document.getElementById('title').value=''; document.getElementById('value').value='';
-      await load();
-    };
-    load();
+
+    document.getElementById('dealForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const data = load();
+      data.push({
+        id: crypto.randomUUID(),
+        nome: f.get('nome'), email: f.get('email'), fone: f.get('fone'),
+        tipo: f.get('tipo'), parcela: f.get('parcela'), obs: f.get('obs'),
+        stage:'offer', createdAt: Date.now()
+      });
+      save(data);
+      e.target.reset();
+      bootstrap.Modal.getInstance(document.getElementById('newDeal')).hide();
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

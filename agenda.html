@@ -1,48 +1,93 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Agenda — HS CRM</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#e5e7eb}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    table{width:100%;border-collapse:collapse}
-    th,td{border:1px solid #1f2937;padding:8px;background:#0f172a}
-    input,select{background:#111827;border:1px solid #334155;color:#e5e7eb;border-radius:8px;padding:8px}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HS CRM — Agenda</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/assets/ui.css">
 </head>
 <body>
+  <div id="app"></div>
+
+  <template id="raw">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 mb-0">Agenda semanal</h2>
+      <div class="text-body-secondary small" id="progressTxt">Progresso: 0%</div>
+    </div>
+
+    <div class="alert alert-info">
+      Defina o plano da semana (manhã/tarde). Marque o check ao concluir.
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Dia</th><th>Manhã</th><th>Feito</th><th>Tarde</th><th>Feito</th>
+          </tr>
+        </thead>
+        <tbody id="agendaBody"></tbody>
+      </table>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button id="saveAgenda" class="btn btn-primary">Salvar</button>
+      <button id="clearAgenda" class="btn btn-outline-danger">Limpar</button>
+    </div>
+  </template>
+
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <div class="wrap">
-    <h1>Agenda semanal</h1>
-    <table>
-      <thead><tr><th>Dia</th><th>Manhã</th><th>Tarde</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
-    <p><button id="save">Salvar</button> <a href="/">← Voltar</a></p>
-  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    import { ensureIdentity } from './ui/auth.js';
-    const user = await ensureIdentity();
-    if(!user) alert('Faça login para salvar seu planejamento.');
-    const rows = document.getElementById('rows');
-    const days = ['Segunda','Terça','Quarta','Quinta','Sexta'];
-    const plan = await fetch('/api/plan_get',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload:{email:user?.email||''}})}).then(r=>r.json());
-    const map = plan.items||{};
-    days.forEach((d,i)=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${d}</td>
-      <td><input id="m_${i}" value="${map['m_'+i]||''}" placeholder="ex.: 30 ligações, 10 follow-ups"></td>
-      <td><input id="t_${i}" value="${map['t_'+i]||''}" placeholder="ex.: 5 visitas, 20 propostas"></td>`;
-      rows.appendChild(tr);
-    });
-    document.getElementById('save').onclick=async()=>{
-      const payload = { email: user?.email||'', items:{} };
-      days.forEach((d,i)=>{ payload.items['m_'+i]=document.getElementById('m_'+i).value; payload.items['t_'+i]=document.getElementById('t_'+i).value; });
-      await fetch('/api/plan_save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({payload})});
-      alert('Planejamento salvo.');
+    import { renderShell } from '/assets/ui.js';
+    const content = document.getElementById('raw')?.innerHTML || '';
+    renderShell({ active: 'agenda', content });
+
+    const LS_KEY = 'hscrm_agenda';
+    const dias = ['Segunda','Terça','Quarta','Quinta','Sexta'];
+    const opcoes = ['Ligações','Reuniões','WhatsApp','E-mail','Redes sociais','Vídeo','Propostas','Follow-up','Pós-venda','Networking'];
+
+    function load(){ try { return JSON.parse(localStorage.getItem(LS_KEY))||{}; } catch { return {}; } }
+    function save(v){ localStorage.setItem(LS_KEY, JSON.stringify(v)); }
+    function mkSelect(val=''){
+      return `<select class="form-select">
+        ${opcoes.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}
+      </select>`;
+    }
+    function render(){
+      const data = load(); const tbody = document.getElementById('agendaBody'); tbody.innerHTML='';
+      let total=0, done=0;
+      dias.forEach((d,i)=>{
+        const row = data[d]||{manha:'Ligações',tarde:'Reuniões',dm:false,dt:false};
+        total += 2; done += (row.dm?1:0) + (row.dt?1:0);
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr data-dia="${d}">
+            <td class="fw-semibold">${d}</td>
+            <td>${mkSelect(row.manha)}</td>
+            <td class="text-center"><input class="form-check-input" type="checkbox" ${row.dm?'checked':''}></td>
+            <td>${mkSelect(row.tarde)}</td>
+            <td class="text-center"><input class="form-check-input" type="checkbox" ${row.dt?'checked':''}></td>
+          </tr>`);
+      });
+      document.getElementById('progressTxt').textContent = `Progresso: ${Math.round(done/total*100)}%`;
+    }
+
+    document.getElementById('saveAgenda').onclick = ()=>{
+      const out = {};
+      document.querySelectorAll('#agendaBody tr').forEach(tr=>{
+        const dia = tr.dataset.dia;
+        const [selM, chkM, selT, chkT] = tr.querySelectorAll('select, input');
+        out[dia] = { manha: selM.value, dm: chkM.checked, tarde: selT.value, dt: chkT.checked };
+      });
+      save(out);
+      render();
     };
+    document.getElementById('clearAgenda').onclick = ()=>{ localStorage.removeItem(LS_KEY); render(); };
+
+    render();
   </script>
 </body>
 </html>
